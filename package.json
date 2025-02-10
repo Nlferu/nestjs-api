@@ -6,6 +6,13 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+    "db:doc:dev:rm": "docker compose rm dev-db -s -f -v",
+    "db:doc:dev:up": "docker compose up dev-db -d",
+    "db:doc:dev:restart": "yarn db:doc:dev:rm && yarn db:doc:dev:up && yarn prisma:dev:deploy",
+    "db:dev:rm": "\"E:\\PostgreSQL\\bin\\psql.exe\" -U postgres -d postgres -c \"DROP DATABASE base_api WITH (FORCE);\"",
+    "db:dev:up": "\"E:\\PostgreSQL\\bin\\psql.exe\" -U postgres -d postgres -c \"CREATE DATABASE base_api;\"",
+    "prisma:dev:deploy": "prisma migrate deploy",
+    "db:dev:restart": "yarn db:dev:rm && yarn db:dev:up && node -e \"setTimeout(()=>{}, 1000)\" && yarn prisma:dev:deploy",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
@@ -21,9 +28,13 @@
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
+    "@nestjs/config": "^4.0.0",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
     "@prisma/client": "^6.3.1",
+    "argon2": "^0.41.1",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
     "dotenv": "^16.4.7",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
