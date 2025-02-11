@@ -1,13 +1,19 @@
+import * as argon from 'argon2'
 import { ForbiddenException, Injectable } from '@nestjs/common'
 import { PrismaService } from 'src/prisma/prisma.service'
 import { AuthDto } from './dto'
-import * as argon from 'argon2'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
+import { JwtService } from '@nestjs/jwt'
+import { ConfigService } from '@nestjs/config'
 
 /** @notice It provides dependency injection */
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private jwt: JwtService,
+    private config: ConfigService,
+  ) {}
 
   async signup(dto: AuthDto) {
     // Generate the password hash
@@ -20,10 +26,11 @@ export class AuthService {
       })
 
       // Do not print password in response
-      const { hash: _, ...userWithoutHash } = user
+      // const { hash: _, ...userWithoutHash } = user
 
       // Return the saved user
-      return { msg: 'User has been created!', userWithoutHash }
+      // return { msg: 'User has been created!', userWithoutHash }
+      return this.signToken(user.id, user.email)
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         // Duplicate field prisma code
@@ -53,8 +60,16 @@ export class AuthService {
 
     // If password correct -> send back the user
     // Do not print password in response
-    const { hash: _, ...userWithoutHash } = user
+    // const { hash: _, ...userWithoutHash } = user
 
-    return { msg: 'You have logged in!', userWithoutHash }
+    // return { msg: 'You have logged in!', this.signToken(user.id, user.email) }
+    return this.signToken(user.id, user.email)
+  }
+
+  signToken(userId: number, email: string): Promise<string> {
+    const payload = { sub: userId, email }
+    const secret = this.config.get('JWT_SECRET')
+
+    return this.jwt.signAsync(payload, { expiresIn: '15m', secret: secret })
   }
 }
