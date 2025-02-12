@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { PassportStrategy } from '@nestjs/passport'
 import { ExtractJwt, Strategy } from 'passport-jwt'
-import { PrismaService } from 'src/prisma/prisma.service'
+import { PrismaService } from '../../prisma/prisma.service'
 
 /** @dev This class validates access token */
 /** @dev Second parameter 'jwt' (if undefined it will be 'jwt') we can name it as we want. It defines strategy to be used by 'AuthGuard' */
