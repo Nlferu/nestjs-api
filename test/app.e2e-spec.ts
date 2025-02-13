@@ -3,7 +3,9 @@ import { Test } from '@nestjs/testing'
 import { AppModule } from '../src/app.module'
 import { INestApplication, ValidationPipe } from '@nestjs/common'
 import { PrismaService } from '../src/prisma/prisma.service'
-import { AuthDto } from '../src/auth/dto'
+import { AuthDto } from 'src/auth/dto'
+import { EditUserDto } from 'src/user/dto'
+import { CreateBookmarkDto } from 'src/bookmark/dto'
 
 describe('App e2e', () => {
   let app: INestApplication
@@ -112,18 +114,100 @@ describe('App e2e', () => {
       })
     })
 
-    describe('Edit user', () => {})
+    describe('Edit user', () => {
+      it('should edit user', () => {
+        const dto: EditUserDto = {
+          firstName: 'Vampire',
+          email: 'coder@gmah.com',
+        }
+
+        /** @dev userId is picked from JWT access_token */
+        return pactum
+          .spec()
+          .patch(`/users`)
+          .withBearerToken('$S{userAt}')
+          .withBody(dto)
+          .expectStatus(200)
+          .expectBodyContains(dto.firstName)
+          .expectBodyContains(dto.email)
+      })
+    })
   })
 
   describe('Bookmark', () => {
-    describe('Create bookmark', () => {})
+    describe('Get empty bookmark', () => {
+      it('should get bookmarks', () => {
+        return pactum
+          .spec()
+          .get(`/bookmarks`)
+          .withBearerToken('$S{userAt}')
+          .expectStatus(200)
+          .expectBody([])
+      })
+    })
 
-    describe('Get bookmarks', () => {})
+    describe('Create bookmark', () => {
+      const dto: CreateBookmarkDto = {
+        title: 'First Bookmark',
+        link: 'https://www.youtube.com/watch?v=GHTA143_b-s&ab_channel=freeCodeCamp.org',
+      }
 
-    describe('Get bookmark by id', () => {})
+      it('should create bookmark', () => {
+        return pactum
+          .spec()
+          .post(`/bookmarks`)
+          .withBearerToken('$S{userAt}')
+          .withBody(dto)
+          .expectStatus(201)
+          .expectBodyContains(dto.title)
+          .expectBodyContains(dto.link)
+          .stores('bookmarkId', 'id')
+      })
+    })
 
-    describe('Edit bookmark', () => {})
+    describe('Get bookmarks', () => {
+      it('should get bookmarks', () => {
+        return pactum
+          .spec()
+          .get(`/bookmarks`)
+          .withBearerToken('$S{userAt}')
+          .expectStatus(200)
+          .expectJsonLength(1)
+      })
+    })
 
-    describe('Delete bookmark', () => {})
+    describe('Get bookmark by id', () => {
+      it('should get bookmark by id', () => {
+        return pactum
+          .spec()
+          .get(`/bookmarks/{id}`)
+          .withPathParams('id', '$S{bookmarkId}')
+          .withBearerToken('$S{userAt}')
+          .expectStatus(200)
+          .expectBodyContains('$S{bookmarkId}')
+      })
+    })
+
+    describe('Edit bookmark by id', () => {
+      // it('should edit bookmark', () => {
+      //   return pactum
+      //     .spec()
+      //     .patch(`/bookmarks`)
+      //     .withBearerToken('$S{userAt}')
+      //     .expectStatus(200)
+      //     .expectJsonLength(1)
+      // })
+    })
+
+    describe('Delete bookmark by id', () => {
+      // it('should delete bookmark', () => {
+      //   return pactum
+      //     .spec()
+      //     .delete(`/bookmarks`)
+      //     .withBearerToken('$S{userAt}')
+      //     .expectStatus(200)
+      //     .expectJsonLength(1)
+      // })
+    })
   })
 })
