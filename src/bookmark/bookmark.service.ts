@@ -22,7 +22,7 @@ export class BookmarkService {
     })
   }
 
-  async getBookmarkById(userId: number, bookmarkId: number) {
+  getBookmarkById(userId: number, bookmarkId: number) {
     return this.prisma.bookmark.findUnique({
       where: {
         userId,
